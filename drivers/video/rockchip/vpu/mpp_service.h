@@ -17,21 +17,7 @@
 #ifndef __ROCKCHIP_MPP_SERVICE_H
 #define __ROCKCHIP_MPP_SERVICE_H
 
-#include <linux/ioctl.h>
-
 #include "mpp_dev_common.h"
-
-struct mpp_session {
-	struct mpp_dma_session *dma;
-	/* a linked list of data so we can access them for debugging */
-	struct list_head list_session;
-	/* the session related device private data */
-	struct rockchip_mpp_dev *mpp;
-	struct list_head done;
-	wait_queue_head_t wait;
-	pid_t pid;
-	atomic_t task_running;
-};
 
 enum mpp_srv_state {
 	HW_RUNNING	= BIT(1)
@@ -42,15 +28,13 @@ struct mpp_service {
 	struct mutex lock;
 	struct list_head pending;
 	struct list_head done;
+	/* serivce critical time lock */
+	struct mutex running_lock;
 	struct list_head running;
 	/* link to list_session in struct mpp_session */
 	struct list_head session;
 
 	struct device *dev;
-
-	void __iomem *reg_base;
-
-	struct class *cls;
 
 	u32 dev_cnt;
 	struct list_head subdev_list;
@@ -58,19 +42,19 @@ struct mpp_service {
 
 void mpp_srv_lock(struct mpp_service *pservice);
 void mpp_srv_unlock(struct mpp_service *pservice);
-void mpp_srv_pending_locked(struct mpp_service *pservice, struct mpp_ctx *ctx);
-void mpp_srv_run(struct mpp_service *pservice);
-void mpp_srv_done(struct mpp_service *pservice);
+void mpp_srv_pending_locked(struct mpp_service *pservice,
+			    struct mpp_task *task);
+void mpp_srv_run(struct mpp_service *pservice, struct mpp_task *task);
+void mpp_srv_done(struct mpp_service *pservice, struct mpp_task *task);
+int mpp_srv_abort(struct mpp_service *pservice, struct mpp_task *task);
 void mpp_srv_attach(struct mpp_service *pservice, struct list_head *elem);
 void mpp_srv_detach(struct mpp_service *pservice, struct list_head *elem);
-struct mpp_ctx *mpp_srv_get_pending_ctx(struct mpp_service *pservice);
-struct mpp_ctx *mpp_srv_get_current_ctx(struct mpp_service *pservice);
-struct mpp_ctx *mpp_srv_get_last_running_ctx(struct mpp_service *pservice);
-struct mpp_session *mpp_srv_get_current_session(struct mpp_service *pservice);
-bool mpp_srv_pending_is_empty(struct mpp_service *pservice);
-struct mpp_ctx *mpp_srv_get_done_ctx(struct mpp_session *session);
+struct mpp_task *mpp_srv_get_pending_task(struct mpp_service *pservice);
+struct mpp_task *mpp_srv_get_current_task(struct mpp_service *pservice);
+void mpp_srv_wait_to_run(struct mpp_service *pservice);
+
+struct mpp_task *mpp_srv_get_done_task(struct mpp_session *session);
 bool mpp_srv_is_power_on(struct mpp_service *pservice);
-bool mpp_srv_is_running(struct mpp_service *pservice);
+int mpp_srv_is_running(struct mpp_service *pservice);
 
 #endif
-

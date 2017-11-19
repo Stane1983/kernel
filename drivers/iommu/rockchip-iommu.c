@@ -99,8 +99,6 @@ struct rk_iommu {
 	bool skip_read;	     /* rk3126/rk3128 can't read vop iommu registers */
 	struct list_head node; /* entry in rk_iommu_domain.iommus */
 	struct iommu_domain *domain; /* domain to which iommu is attached */
-	struct clk *aclk; /* aclock belong to master */
-	struct clk *hclk; /* hclock belong to master */
 	struct list_head dev_node;
 };
 
@@ -265,26 +263,6 @@ static u32 rk_mk_pte_invalid(u32 pte)
 #define RK_IOVA_PAGE_MASK   0x00000fff
 #define RK_IOVA_PAGE_SHIFT  0
 
-static void rk_iommu_power_on(struct rk_iommu *iommu)
-{
-	if (iommu->aclk && iommu->hclk) {
-		clk_enable(iommu->aclk);
-		clk_enable(iommu->hclk);
-	}
-
-	pm_runtime_get_sync(iommu->dev);
-}
-
-static void rk_iommu_power_off(struct rk_iommu *iommu)
-{
-	pm_runtime_put_sync(iommu->dev);
-
-	if (iommu->aclk && iommu->hclk) {
-		clk_disable(iommu->aclk);
-		clk_disable(iommu->hclk);
-	}
-}
-
 static u32 rk_iova_dte_index(dma_addr_t iova)
 {
 	return (u32)(iova & RK_IOVA_DTE_MASK) >> RK_IOVA_DTE_SHIFT;
@@ -332,16 +310,14 @@ static void rk_iommu_zap_lines(struct rk_iommu *iommu, dma_addr_t iova_start,
 	 * entire iotlb rather than iterate over individual iovas.
 	 */
 
-	rk_iommu_power_on(iommu);
-
+	pm_runtime_get_sync(iommu->dev);
 	for (i = 0; i < iommu->num_mmu; i++) {
 		dma_addr_t iova;
 
 		for (iova = iova_start; iova < iova_end; iova += SPAGE_SIZE)
 			rk_iommu_write(iommu->bases[i], RK_MMU_ZAP_ONE_LINE, iova);
 	}
-
-	rk_iommu_power_off(iommu);
+	pm_runtime_put_sync(iommu->dev);
 }
 
 static bool rk_iommu_is_stall_active(struct rk_iommu *iommu)
@@ -883,8 +859,6 @@ static int rk_iommu_attach_device(struct iommu_domain *domain,
 	if (!iommu)
 		return 0;
 
-	rk_iommu_power_on(iommu);
-
 	ret = rk_iommu_enable_stall(iommu);
 	if (ret)
 		return ret;
@@ -962,8 +936,6 @@ static void rk_iommu_detach_device(struct iommu_domain *domain,
 
 read_wa:
 	iommu->domain = NULL;
-
-	rk_iommu_power_off(iommu);
 
 	dev_dbg(dev, "Detached from iommu domain\n");
 }
@@ -1254,23 +1226,6 @@ static int rk_iommu_probe(struct platform_device *pdev)
 
 	iommu->skip_read = device_property_read_bool(dev,
 				"rockchip,skip-mmu-read");
-
-	iommu->aclk = devm_clk_get(dev, "aclk");
-	if (IS_ERR(iommu->aclk)) {
-		dev_info(dev, "can't get aclk\n");
-		iommu->aclk = NULL;
-	}
-
-	iommu->hclk = devm_clk_get(dev, "hclk");
-	if (IS_ERR(iommu->hclk)) {
-		dev_info(dev, "can't get hclk\n");
-		iommu->hclk = NULL;
-	}
-
-	if (iommu->aclk && iommu->hclk) {
-		clk_prepare(iommu->aclk);
-		clk_prepare(iommu->hclk);
-	}
 
 	pm_runtime_enable(iommu->dev);
 	pm_runtime_get_sync(iommu->dev);

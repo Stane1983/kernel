@@ -220,6 +220,10 @@
 	};
 };
 
+&hevc {
+	status = "okay";
+};
+
 &hevc_service {
 	status = "okay";
 };
@@ -570,6 +574,14 @@
 };
 
 &vopb {
+	status = "okay";
+};
+
+&vdpu {
+	status = "okay";
+};
+
+&vepu {
 	status = "okay";
 };
 

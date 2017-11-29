@@ -697,7 +697,7 @@
 			<&cru SRST_VDEC_NIU_A>, <&cru SRST_VDEC_NIU_H>,
 			<&cru SRST_VDEC_CABAC>, <&cru SRST_VDEC_CORE>;
 		reset-names = "video_a", "video_h", "niu_a", "niu_h",
-			"cabac", "video";
+			"video_cabac", "video_core";
 		iommus = <&rkvdec_mmu>;
 		power-domains = <&power RK3328_PD_VIDEO>;
 		rockchip,srv = <&rkvdec_srv>;

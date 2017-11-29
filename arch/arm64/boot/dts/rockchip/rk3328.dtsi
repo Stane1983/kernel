@@ -647,8 +647,13 @@
 		};
 	};
 
-	vpu_service: vpu-service@ff350000 {
-		compatible = "rockchip,vpu_service";
+	vpu_service: rkvpu-srv {
+		compatible = "rockchip,mpp-service";
+		status = "disabled";
+	};
+
+	vdpu: vpu-decoder@ff350000 {
+		compatible = "rockchip,vpu-decoder-v2";
 		reg = <0x0 0xff350000 0x0 0x800>;
 		interrupts = <GIC_SPI 9 IRQ_TYPE_LEVEL_HIGH>;
 		interrupt-names = "irq_dec";
@@ -656,10 +661,9 @@
 		reset-names = "video_a", "video_h";
 		clocks = <&cru ACLK_VPU>, <&cru HCLK_VPU>;
 		clock-names = "aclk_vcodec", "hclk_vcodec";
-		rockchip,grf = <&grf>;
 		iommus = <&vpu_mmu>;
-		allocator = <1>;
 		power-domains = <&power RK3328_PD_VPU>;
+		rockchip,srv = <&vpu_service>;
 		status = "disabled";
 	};
 
@@ -672,10 +676,16 @@
 		clocks = <&cru ACLK_VPU>, <&cru HCLK_VPU>;
 		power-domains = <&power RK3328_PD_VPU>;
 		#iommu-cells = <0>;
+		status = "disabled";
+	};
+
+	rkvdec_srv: rkvdec-srv {
+		compatible = "rockchip,mpp-service";
+		status = "disabled";
 	};
 
 	rkvdec: rkvdec@ff36000 {
-		compatible = "rockchip,rkvdec";
+		compatible = "rockchip,video-decoder-v1";
 		reg = <0x0 0xff360000 0x0 0x400>;
 		interrupts = <GIC_SPI 7 IRQ_TYPE_LEVEL_HIGH>;
 		interrupt-names = "irq_dec";
@@ -688,10 +698,9 @@
 			<&cru SRST_VDEC_CABAC>, <&cru SRST_VDEC_CORE>;
 		reset-names = "video_a", "video_h", "niu_a", "niu_h",
 			"cabac", "video";
-		rockchip,grf = <&grf>;
 		iommus = <&rkvdec_mmu>;
-		allocator = <1>;
 		power-domains = <&power RK3328_PD_VIDEO>;
+		rockchip,srv = <&rkvdec_srv>;
 		status = "disabled";
 	};
 
@@ -704,6 +713,7 @@
 		clock-names = "aclk_vcodec", "hclk_vcodec";
 		power-domains = <&power RK3328_PD_VIDEO>;
 		#iommu-cells = <0>;
+		status = "disabled";
 	};
 
 	h265e: h265e@ff330000 {

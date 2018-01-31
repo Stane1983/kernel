@@ -512,6 +512,7 @@ dtb-$(CONFIG_ARCH_QCOM) += \
 dtb-$(CONFIG_ARCH_REALVIEW) += \
 	arm-realview-pb1176.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += \
+	rk3036-echo.dtb \
 	rk3036-evb.dtb \
 	rk3036-kylin.dtb \
 	rk3066a-bqcurie2.dtb \
@@ -540,6 +541,7 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += \
 	rk3288-fennec.dtb \
 	rk3288-firefly-beta.dtb \
 	rk3288-firefly-reload.dtb \
+	rk3288-firefly-reload-linux.dtb \
 	rk3288-firefly-rk808.dtb \
 	rk3288-firefly.dtb \
 	rk3288-miniarm.dtb \
@@ -547,6 +549,7 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += \
 	rk3288-phycore-rdk.dtb \
 	rk3288-popmetal.dtb \
 	rk3288-popmetal-android.dtb \
+	rk3288-popmetal-android-vga.dtb \
 	rk3288-r89.dtb \
 	rk3288-rock2-square.dtb \
 	rk3288-veyron-jaq.dtb \

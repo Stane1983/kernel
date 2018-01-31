@@ -11,19 +11,22 @@
 #include <drm/drm_crtc_helper.h>
 #include <drm/drm_of.h>
 
+#include <uapi/linux/videodev2.h>
+
 #include "rockchip_drm_drv.h"
 #include "rockchip_drm_tve.h"
 #include "rockchip_drm_vop.h"
 
 static const struct drm_display_mode cvbs_mode[] = {
 	{ DRM_MODE("720x576i", DRM_MODE_TYPE_DRIVER |
-		   DRM_MODE_TYPE_PREFERRED, 13500, 720, 732,
-		   795, 864, 0, 576, 580, 586, 625, 0,
+		   DRM_MODE_TYPE_PREFERRED, 13500, 720, 753,
+		   816, 864, 0, 576, 580, 586, 625, 0,
 		   DRM_MODE_FLAG_PHSYNC | DRM_MODE_FLAG_PVSYNC |
 		   DRM_MODE_FLAG_INTERLACE | DRM_MODE_FLAG_DBLCLK),
 		   .vrefresh = 50, 0, },
-	{ DRM_MODE("720x480i", DRM_MODE_TYPE_DRIVER, 13500, 720, 739,
-		   801, 858, 0, 480, 488, 494, 525, 0,
+
+	{ DRM_MODE("720x480i", DRM_MODE_TYPE_DRIVER, 13500, 720, 753,
+		   815, 858, 0, 480, 480, 486, 525, 0,
 		   DRM_MODE_FLAG_PHSYNC | DRM_MODE_FLAG_PVSYNC |
 		   DRM_MODE_FLAG_INTERLACE | DRM_MODE_FLAG_DBLCLK),
 		   .vrefresh = 60, 0, },
@@ -276,6 +279,9 @@ rockchip_tve_encoder_atomic_check(struct drm_encoder *encoder,
 		s->bus_format = info->bus_formats[0];
 	else
 		s->bus_format = MEDIA_BUS_FMT_YUV8_1X24;
+
+	s->color_space = V4L2_COLORSPACE_SMPTE170M;
+	s->tv_state = &conn_state->tv;
 
 	return 0;
 }

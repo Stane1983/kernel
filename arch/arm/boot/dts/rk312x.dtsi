@@ -817,6 +817,7 @@
 		resets = <&cru SRST_MIPIPHY_P>;
 		reset-names = "apb";
 		power-domains = <&power RK3128_PD_VIO>;
+		rockchip,grf = <&grf>;
 		#phy-cells = <0>;
 		status = "disabled";
 	};
@@ -1246,7 +1247,7 @@
 			};
 
 			sdmmc_cmd: sdmmc-cmd {
-				rockchip,pins = <1 RK_PC1 1 &pcfg_pull_default>;
+				rockchip,pins = <1 RK_PB7 1 &pcfg_pull_default>;
 			};
 
 			sdmmc_wp: sdmmc-wp {
